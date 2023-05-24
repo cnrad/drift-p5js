@@ -30,10 +30,12 @@ function mouseClicked() {
   if (variation === 0) {
     variation = 1;
     maxWidth = 30;
+    slowRate = 3;
     rows = floor(height / scl) * 2;
   } else {
     variation = 0;
     maxWidth = 15;
+    slowRate = 8;
     rows = floor(height / scl);
   }
 }
@@ -52,7 +54,6 @@ function draw() {
       let b = map(noise(xoff + 200, yoff + 200, zoff), 0, 1, 0, 255);
 
       let angle = noise(xoff, yoff, zoff) * TWO_PI;
-      // let v = p5.Vector.fromAngle(angle);
       let v = createVector(Math.cos(angle), Math.sin(angle), 0);
 
       let m = map(noise(xoff, yoff, magOff), 0, 1, magnitude * -1, magnitude);
@@ -67,14 +68,6 @@ function draw() {
 
       let strokeWidth = map(abs(m), 0, magnitude, 1, maxWidth);
 
-      // 2D
-      // Gradient lines, for opacity
-      //   let gradient = drawingContext.createLinearGradient(0, 0, endpoint, 0);
-      //   gradient.addColorStop(0, color(r, g, b, 0));
-      //   gradient.addColorStop(1, color(r, g, b, map(abs(m), 0, 1, 0, 200)));
-      //   drawingContext.strokeStyle = gradient;
-
-      // WEBGL
       noStroke();
       beginShape();
       fill(r, g, b, 0);
@@ -86,13 +79,15 @@ function draw() {
       vertex(endpoint, (strokeWidth / 2) * -1);
       endShape(CLOSE);
 
-      strokeWeight(strokeWidth);
-
+      // Arc to add a rounded cap to the line
       fill(r, g, b);
       arc(endpoint, 0, strokeWidth, strokeWidth, PI + HALF_PI, HALF_PI);
+      noFill();
 
       // Add the little point at the end of a line, if the magnitude is lower
-      stroke(r, g, b, map(abs(m), 0, magnitude / 2, 75, 0));
+      strokeWeight(strokeWidth);
+      let pointColor = color(r, g, b, map(abs(m), 0, magnitude / 3, 200, 0));
+      stroke(pointColor);
       point(endpoint, 0);
 
       pop();
