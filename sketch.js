@@ -13,7 +13,7 @@ var maxWidth = 15;
 var variation = 0;
 
 function setup() {
-  createCanvas(windowWidth * 1.1, windowHeight * 1.1, WEBGL);
+  createCanvas(windowWidth * 1.2, windowHeight * 1.2, WEBGL);
   pixelDensity(2);
   cols = floor(width / scl);
   rows = floor(height / scl);
@@ -49,25 +49,35 @@ function draw() {
   for (let y = 0; y < rows + 2; y++) {
     let xoff = start;
     for (let x = 0; x < cols + 2; x++) {
+      // Random colors
       let r = map(noise(xoff, yoff, zoff), 0, 1, 0, 255);
       let g = map(noise(xoff + 100, yoff + 100, zoff), 0, 1, 0, 255);
       let b = map(noise(xoff + 200, yoff + 200, zoff), 0, 1, 0, 255);
 
+      // Determine angle
       let angle = noise(xoff, yoff, zoff) * TWO_PI;
+      // Create vector from angle
       let v = createVector(Math.cos(angle), Math.sin(angle), 0);
 
+      // Determine magnitude
       let m = map(noise(xoff, yoff, magOff), 0, 1, magnitude * -1, magnitude);
 
-      // push() and pop() for individualized transforms
+      // Use push() and pop() for individualized transforms
       push();
+
+      // Blend mode, so the colors add over one another when lines overlap
       blendMode(ADD);
       stroke(r, g, b);
       translate(x * scl, y * scl);
-      if (variation === 0) rotate(v.heading());
+      // Determine where the line ends
       let endpoint = abs(m) * scl;
 
-      let strokeWidth = map(abs(m), 0, magnitude, 1, maxWidth);
+      if (variation === 0) rotate(v.heading());
 
+      // Determine stroke width based on absolute magnitude
+      let strokeWidth = map(abs(m), 0, magnitude, 0, maxWidth);
+
+      // Draw line with gradient starting from alpha 0
       noStroke();
       beginShape();
       fill(r, g, b, 0);
@@ -100,9 +110,3 @@ function draw() {
   magOff += magInc / slowRate;
   zoff += incStart / slowRate;
 }
-
-// function draw() {
-//   background(0);
-
-//   box();
-// }
