@@ -2,12 +2,12 @@ var inc = 0.05;
 var incStart = 0.025;
 var magInc = 0.01;
 var start = 0;
-var scl = 50;
+var scl = 30;
 var cols, rows;
 var zoff = 0;
 var magOff = 0;
 var magnitude = 8;
-var slowRate = 5;
+var slowRate = 8;
 var maxWidth = 15;
 
 var variation = 0;
@@ -44,9 +44,9 @@ function draw() {
   translate(windowWidth * -0.5, windowHeight * -0.5);
 
   var yoff = 0;
-  for (let y = 0; y < rows; y++) {
+  for (let y = 0; y < rows + 2; y++) {
     let xoff = start;
-    for (let x = 0; x < cols; x++) {
+    for (let x = 0; x < cols + 2; x++) {
       let r = map(noise(xoff, yoff, zoff), 0, 1, 0, 255);
       let g = map(noise(xoff + 100, yoff + 100, zoff), 0, 1, 0, 255);
       let b = map(noise(xoff + 200, yoff + 200, zoff), 0, 1, 0, 255);
@@ -86,10 +86,12 @@ function draw() {
       vertex(endpoint, (strokeWidth / 2) * -1);
       endShape(CLOSE);
 
-      // 2D
-      //   line(0, 0, endpoint, 0);
-      // Add the little point at the end of a line, if the magnitude is lower
       strokeWeight(strokeWidth);
+
+      fill(r, g, b);
+      arc(endpoint, 0, strokeWidth, strokeWidth, PI + HALF_PI, HALF_PI);
+
+      // Add the little point at the end of a line, if the magnitude is lower
       stroke(r, g, b, map(abs(m), 0, magnitude / 2, 75, 0));
       point(endpoint, 0);
 
