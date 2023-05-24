@@ -13,7 +13,7 @@ var maxWidth = 15;
 var variation = 0;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight, WEBGL);
+  createCanvas(windowWidth * 1.1, windowHeight * 1.1, WEBGL);
   pixelDensity(2);
   cols = floor(width / scl);
   rows = floor(height / scl);
@@ -43,7 +43,7 @@ function mouseClicked() {
 function draw() {
   background(0);
 
-  translate(windowWidth * -0.5, windowHeight * -0.5);
+  translate(width * -0.5, height * -0.5);
 
   var yoff = 0;
   for (let y = 0; y < rows + 2; y++) {
