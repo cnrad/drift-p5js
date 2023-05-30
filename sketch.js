@@ -1,3 +1,4 @@
+// @ts-nocheck
 var inc = 0.05;
 var incStart = 0.025;
 var magInc = 0.01;
@@ -7,10 +8,11 @@ var cols, rows;
 var zoff = 0;
 var magOff = 0;
 var magnitude = 5;
-var slowRate = 8;
-var maxWidth = 11;
 
 var variation = 0;
+var noiseType = "simplex";
+
+var variations;
 
 (function(global){
   /*
@@ -194,6 +196,33 @@ function setup() {
   cols = floor(width / scl);
   rows = floor(height / scl);
   background(0);
+
+  variations = [
+    {
+      maxWidth: 11,
+      slowRate: 6,
+      angles: 1,
+      length: 1
+    },
+    {
+      maxWidth: 25,
+      slowRate: 3,
+      angles: 0,
+      length: 1,
+    },
+    {
+      maxWidth: 8,
+      slowRate: 2,
+      angles: -1,
+      length: 3,
+    },
+    {
+      maxWidth: 25,
+      slowRate: 3,
+      angles: 1,
+      length: 0,
+    }
+  ]
 }
 
 function windowResized() {
@@ -202,18 +231,10 @@ function windowResized() {
   rows = floor(height / scl);
 }
 
-function mouseClicked() {
-  if (variation === 0) {
-    variation = 1;
-    maxWidth = 25;
-    slowRate = 3;
-    rows = floor(height / scl) * 2;
-  } else {
-    variation = 0;
-    maxWidth = 11;
-    slowRate = 8;
-    rows = floor(height / scl);
-  }
+function genNoise(x, y, z) {
+  // Because p5js perlin noise returns 0-1 but simplex returns -1-1, convert output to 0-1
+  if(noiseType === "simplex") return (simplex3(x, y, z) + 1) / 2;
+  if(noiseType === "perlin") return noise(x, y, z);
 }
 
 function draw() {
@@ -226,17 +247,21 @@ function draw() {
     let xoff = start;
     for (let x = 0; x < cols + 2; x++) {
       // Random colors
-      let r = map(simplex3(xoff, yoff, zoff), -1, 1, 0, 255);
-      let g = map(simplex3(xoff + 100, yoff + 100, zoff), -1, 1, 0, 255);
-      let b = map(simplex3(xoff + 200, yoff + 200, zoff), -1, 1, 0, 255);
+      let r = map(genNoise(xoff, yoff, zoff), 0, 1, 0, 255);
+      let g = map(genNoise(xoff + 100, yoff + 100, zoff), 0, 1, 0, 255);
+      let b = map(genNoise(xoff + 200, yoff + 200, zoff), 0, 1, 0, 255);
 
       // Determine angle
-      let angle = simplex3(xoff / 2, yoff / 2, zoff / 2) * PI;
+      let angle = noiseType === "simplex" 
+        ? genNoise(xoff / 2, yoff / 2, zoff / 2) * PI 
+        : genNoise(xoff, yoff, zoff) * TWO_PI;
+      angle = angle * variations[variation].angles;
+
       // Create vector from angle
       let v = createVector(Math.cos(angle), Math.sin(angle), 0);
 
       // Determine magnitude
-      let m = map(simplex3(xoff, yoff, magOff), -1, 1, magnitude * -1, magnitude);
+      let m = map(genNoise(xoff, yoff, magOff), 0, 1, magnitude * -1, magnitude);
 
       // Use push() and pop() for individualized transforms
       push();
@@ -248,10 +273,10 @@ function draw() {
       // Determine where the line ends
       let endpoint = abs(m) * scl;
 
-      if (variation === 0) rotate(v.heading());
+      rotate(v.heading());
 
       // Determine stroke width based on absolute magnitude
-      let strokeWidth = map(abs(m), 0, magnitude, 0, maxWidth);
+      let strokeWidth = map(abs(m), 0, magnitude, 0, variations[variation].maxWidth);
 
       // Draw line with gradient starting from alpha 0
       noStroke();
@@ -261,20 +286,20 @@ function draw() {
       vertex(0, strokeWidth / 2);
 
       fill(r, g, b, 255);
-      vertex(endpoint, strokeWidth / 2);
-      vertex(endpoint, (strokeWidth / 2) * -1);
+      vertex(endpoint * variations[variation].length, strokeWidth / 2);
+      vertex(endpoint * variations[variation].length, (strokeWidth / 2) * -1);
       endShape(CLOSE);
 
       // Arc to add a rounded cap to the line
       fill(r, g, b);
-      arc(endpoint, 0, strokeWidth, strokeWidth, PI + HALF_PI, HALF_PI);
+      arc(endpoint * variations[variation].length, 0, strokeWidth, strokeWidth, PI + HALF_PI, HALF_PI);
       noFill();
 
       // Add the little point at the end of a line, if the magnitude is lower
       strokeWeight(strokeWidth);
       let pointColor = color(r, g, b, map(abs(m), 0, magnitude / 3, 230, 0));
       stroke(pointColor);
-      point(endpoint, 0);
+      point(endpoint * variations[variation].length, 0);
 
       pop();
 
@@ -283,6 +308,18 @@ function draw() {
     yoff += inc;
   }
 
-  magOff += magInc / slowRate;
-  zoff += incStart / slowRate;
+  magOff += magInc / variations[variation].slowRate;
+  zoff += incStart / variations[variation].slowRate;
+}
+
+
+function changeNoise() {
+  let r = noiseType;
+  noiseType === "perlin" ? noiseType = "simplex" : noiseType = "perlin";
+  console.log(r, "CHANGED TO ", noiseType);
+}
+
+function changeVariation() {
+  console.log("changing variation");
+  variation === variations.length - 1 ? variation = 0 : variation++;
 }
