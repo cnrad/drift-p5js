@@ -48,6 +48,7 @@ canvas {
   border-radius: 0.5rem;
   cursor: pointer;
   margin-bottom: 0.75rem;
+  text-transform: capitalize;
   
   &:hover {
     background: rgba(255, 255, 255, 0.15);

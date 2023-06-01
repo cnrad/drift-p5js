@@ -5,7 +5,7 @@ var magInc = 0.01;
 var start = 0;
 var scl = 28;
 var cols, rows;
-var zoff = 0;
+var zoff = 17;
 var magOff = 0;
 var magnitude = 5;
 
@@ -14,6 +14,7 @@ var noiseType = "simplex";
 
 var variations;
 
+// Simplex noise function
 (function(global){
   /*
    * A speed-improved perlin and simplex noise algorithms for 2D.
@@ -314,12 +315,11 @@ function draw() {
 
 
 function changeNoise() {
-  let r = noiseType;
   noiseType === "perlin" ? noiseType = "simplex" : noiseType = "perlin";
-  console.log(r, "CHANGED TO ", noiseType);
+  document.querySelector("#noise_type").textContent = noiseType;
 }
 
 function changeVariation() {
-  console.log("changing variation");
   variation === variations.length - 1 ? variation = 0 : variation++;
+  document.querySelector("#variation_number").textContent = variation;
 }
